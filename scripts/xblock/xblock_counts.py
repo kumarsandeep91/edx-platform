@@ -61,8 +61,9 @@ def _get_course_data_summary(auth_token, months_restriction, xblock_type_set, ap
     # Get the Course list
     response = requests.get(api_root + '/api/courses/v1/courses/')
     json_result = response.json()
-
+    num_courses = 0
     num_pages = 1
+
     if PAGINATION_KEY in json_result and NUM_PAGES_KEY in json_result[PAGINATION_KEY]:
         num_pages = json_result[PAGINATION_KEY][NUM_PAGES_KEY]
         num_courses = json_result[PAGINATION_KEY]['count']
@@ -90,6 +91,16 @@ def _get_course_data_summary(auth_token, months_restriction, xblock_type_set, ap
                     break
                 total_courses += 1
         num_pages -= 1
+
+        # get the url for the next "page" in the pagenated course data and update the json_result
+        page_data = json_result.get(PAGINATION_KEY, None)
+        if page_data is not None:
+            next_page = page_data.get('next', '')
+            if not next_page:
+                break
+            json_result = requests.get(next_page).json()
+
+        # print to update the screen for status
         sys.stdout.write('.')
         sys.stdout.flush()
     print 'Processed %d courses' % total_courses
@@ -233,7 +244,7 @@ def _get_block_summary_totals(course_data):
     unique_course_counts = {}
 
     for course in course_data:
-        block_counts = course[BLOCK_COUNTS_KEY]
+        block_counts = course.get(BLOCK_COUNTS_KEY)
         for count_label, value in block_counts.items():
             if value > 0:
                 if count_label in block_summary_counts:
@@ -280,13 +291,13 @@ def write_course_block_detail_report(course_data):
     """
     with open('xblock_course_detail.csv', 'wb') as csvfile:
         detail_writer = csv.writer(csvfile, delimiter=',',
-                                   quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                                   quotechar='"', quoting=csv.QUOTE_ALL)
         detail_writer.writerow(['XBLOCK_TYPE_NAME', 'COURSE_NAME', 'COURSE_ID', 'COURSE_START', 'COURSE_END', 'NUM_XBLOCK_INSTANCES'])
         for course in course_data:
             for block_type, count in course.get(BLOCK_COUNTS_KEY, []).items():
                 if count > 0:
                     detail_writer.writerow([block_type,
-                                           course.get(COURSE_NAME_KEY, ''),
+                                           course.get(COURSE_NAME_KEY, '').encode('utf-8'),
                                            course.get(COURSE_ID_KEY, ''),
                                            course.get(COURSE_START_KEY, ''),
                                            course.get(COURSE_END_KEY, ''),
