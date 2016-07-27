@@ -246,13 +246,15 @@ def _get_block_summary_totals(course_data):
     for course in course_data:
         block_counts = course.get(BLOCK_COUNTS_KEY)
         for count_label, value in block_counts.items():
+            unique = 0
             if value > 0:
-                if count_label in block_summary_counts:
-                    block_summary_counts[count_label] += value
-                    unique_course_counts[count_label] += 1
-                else:
-                    block_summary_counts[count_label] = value
-                    unique_course_counts[count_label] = 1
+                unique = 1
+            if count_label in block_summary_counts:
+                block_summary_counts[count_label] += value
+                unique_course_counts[count_label] += unique
+            else:
+                block_summary_counts[count_label] = value
+                unique_course_counts[count_label] = unique
 
     return block_summary_counts, unique_course_counts
 
@@ -272,9 +274,10 @@ def write_block_summary_report(course_data):
     # Open and start writing the data into the CSV
     with open('xblock_summary_counts.csv', 'wb') as csvfile:
         summary_writer = csv.writer(csvfile, delimiter=',',
-                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                                    quotechar='"', quoting=csv.QUOTE_MINIMAL)
         summary_writer.writerow(['XBLOCK_NAME', 'UNIQUE_COURSES', 'NUM_TOTAL_INSTANCES'])
-        for block_type, block_count in block_summary_counts.items():
+        for block_type in sorted(block_summary_counts):
+            block_count = block_summary_counts.get(block_type)
             summary_writer.writerow([block_type, str(unique_course_counts[block_type]), str(block_count)])
         csvfile.close()
 
@@ -290,19 +293,24 @@ def write_course_block_detail_report(course_data):
         Nothing
     """
     with open('xblock_course_detail.csv', 'wb') as csvfile:
-        detail_writer = csv.writer(csvfile, delimiter=',',
-                                   quotechar='"', quoting=csv.QUOTE_ALL)
+        detail_writer = csv.writer(
+            csvfile,
+            delimiter=',',
+            quotechar='"',
+            quoting=csv.QUOTE_ALL
+        )
         detail_writer.writerow(['XBLOCK_TYPE_NAME', 'COURSE_NAME', 'COURSE_ID', 'COURSE_START', 'COURSE_END', 'NUM_XBLOCK_INSTANCES'])
         for course in course_data:
             for block_type, count in course.get(BLOCK_COUNTS_KEY, []).items():
                 if count > 0:
-                    detail_writer.writerow([block_type,
-                                           course.get(COURSE_NAME_KEY, '').encode('utf-8'),
-                                           course.get(COURSE_ID_KEY, ''),
-                                           course.get(COURSE_START_KEY, ''),
-                                           course.get(COURSE_END_KEY, ''),
-                                           str(count)]
-                                           )
+                    detail_writer.writerow([
+                        block_type,
+                        course.get(COURSE_NAME_KEY, '').encode('utf-8'),
+                        course.get(COURSE_ID_KEY, ''),
+                        course.get(COURSE_START_KEY, ''),
+                        course.get(COURSE_END_KEY, ''),
+                        str(count)
+                    ])
         csvfile.close()
 
 
