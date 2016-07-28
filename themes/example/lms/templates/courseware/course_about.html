@@ -32,99 +32,102 @@ from openedx.core.djangolib.js_utils import js_escaped_string
   <script src="${static.url('js/course-about.js')}"></script>
 
   <script type="text/javascript">
-  $(function() {
-    // Listen for click events on element tagged with the 'register' class
-    // Submit the hidden enrolllment form, and include information about which
-    // purchasing workflow is being executed (based on which button is clicked)
-    $(".register").click(function(event) {
-      var purchase_workflow = "single";
-      if (event.currentTarget.id.includes("bulk")) {
-        purchase_workflow = "bulk";
-      }
-      var event_target_input = $("<input>")
-               .attr("type", "hidden")
-               .attr("id", "purchase_workflow")
-               .attr("name", "purchase_workflow").val(purchase_workflow);
-      var enroll_form = $("#class_enroll_form");
-      enroll_form.append($(event_target_input));
-      enroll_form.submit();
-      event.preventDefault();
-    });
 
-    % if can_add_course_to_cart:
-      add_course_complete_handler = function(jqXHR, textStatus) {
-        if (jqXHR.status == 200) {
-          location.href = "${cart_link | n, js_escaped_string}";
-        }
-        if (jqXHR.status == 400) {
-          $("#register_error")
-            .html(jqXHR.responseText ? jqXHR.responseText : "${_("An error occurred. Please try again later.")| n, js_escaped_string}")
-            .css("display", "block");
-        }
-        else if (jqXHR.status == 403) {
-            location.href = "${reg_then_add_to_cart_link| n, js_escaped_string}";
-        }
-      };
+    (function(require) {
+      require(['edx-ui-toolkit/js/utils/html-utils'], function(HtmlUtils) {
+        "use strict";
+        // Listen for click events on element tagged with the 'register' class
+        // Submit the hidden enrolllment form, and include information about which
+        // purchasing workflow is being executed (based on which button is clicked)
+        $(".register").click(function(event) {
+          var purchase_workflow = "single";
+          if (event.currentTarget.id.includes("bulk")) {
+            purchase_workflow = "bulk";
+          }
+          var event_target_input = $("<input>")
+                   .attr("type", "hidden")
+                   .attr("id", "purchase_workflow")
+                   .attr("name", "purchase_workflow").val(purchase_workflow);
 
-      $("#add_to_cart_post").click(function(event){
-        $.ajax({
-          url: "${reverse('add_course_to_cart', args=[course.id.to_deprecated_string()]) | n, js_escaped_string}",
-          type: "POST",
-          /* Rant: HAD TO USE COMPLETE B/C PROMISE.DONE FOR SOME REASON DOES NOT WORK ON THIS PAGE. */
-          complete: add_course_complete_handler
-        })
-        event.preventDefault();
+          HtmlUtils.append(""#class_enroll_form"", HtmlUtils.HTML($(event_target_input)));
+          var enroll_form = $("#class_enroll_form");
+          enroll_form.submit();
+          event.preventDefault();
+        });
+
+        % if can_add_course_to_cart:
+          add_course_complete_handler = function(jqXHR, textStatus) {
+            if (jqXHR.status == 200) {
+              location.href = "${cart_link | n, js_escaped_string}";
+            }
+            if (jqXHR.status == 400) {
+              HtmlUtils.setHtml("#register_error", HtmlUtils.HTML(jqXHR.responseText ? jqXHR.responseText : "${_("An error occurred. Please try again later.")| n, js_escaped_string}"));
+              $("#register_error").css("display", "block");
+            }
+            else if (jqXHR.status == 403) {
+                location.href = "${reg_then_add_to_cart_link| n, js_escaped_string}";
+            }
+          };
+
+          $("#add_to_cart_post").click(function(event){
+            $.ajax({
+              url: "${reverse('add_course_to_cart', args=[course.id.to_deprecated_string()]) | n, js_escaped_string}",
+              type: "POST",
+              /* Rant: HAD TO USE COMPLETE B/C PROMISE.DONE FOR SOME REASON DOES NOT WORK ON THIS PAGE. */
+              complete: add_course_complete_handler
+            })
+            event.preventDefault();
+          });
+        % endif
+
+        ## making the conditional around this entire JS block for sanity
+        %if settings.FEATURES.get('RESTRICT_ENROLL_BY_REG_METHOD') and course.enrollment_domain:
+          <%
+            perms_error = Text(_('The currently logged-in user account does not have permission to enroll in this course. '
+                            'You may need to {start_logout_tag}log out{end_tag} then try the enroll button again. '
+                            'Please visit the {start_help_tag}help page{end_tag} for a possible solution.')).format(
+                              start_help_tag=HTML("<a href='/faq'>"), end_tag=HTML('</a>'),
+                              start_logout_tag=HTML("<a href='/logout'>")
+                              )
+          %>
+        $('#class_enroll_form').on('ajax:complete', function(event, xhr) {
+          if(xhr.status == 200) {
+            location.href = "${reverse('dashboard')| n, js_escaped_string}";
+          } else if (xhr.status == 403) {
+            location.href = "${reverse('course-specific-register', args=[course.id.to_deprecated_string()])| n, js_escaped_string}?course_id=${course.id | n, js_escaped_string}&enrollment_action=enroll";
+          } else if (xhr.status == 400) { //This means the user did not have permission
+            HtmlUtils.setHtml("#register_error", HtmlUtils.HTML("${perms_error| n, js_escaped_string}"));
+            $('#register_error').css("display", "block");
+          } else {
+            HtmlUtils.setHtml("#register_error", HtmlUtils.HTML(xhr.responseText ? xhr.responseText : "${_("An error occurred. Please try again later.")| n, js_escaped_string}"));
+            $('#register_error').css("display", "block");
+          }
+        });
+
+        %else:
+
+        $('#class_enroll_form').on('ajax:complete', function(event, xhr) {
+          if(xhr.status == 200) {
+            if (xhr.responseText == "") {
+              location.href = "${reverse('dashboard')| n, js_escaped_string}";
+            }
+            else {
+              location.href = xhr.responseText;
+            }
+          } else if (xhr.status == 403) {
+              // If the form submission receives a Forbidden response, the user is not currently authenticated
+              // Include the purchase workflow context along with the regular user registration location information
+              var purchase_workflow = "&purchase_workflow=" + $("input#purchase_workflow").val();
+              location.href = "${reverse('register_user')| n, js_escaped_string}?course_id=${course.id | n, js_escaped_string}&enrollment_action=enroll" + purchase_workflow;
+          } else {
+            HtmlUtils.setHtml("#register_error", HtmlUtils.HTML(xhr.responseText ? xhr.responseText : "${_("An error occurred. Please try again later.")| n, js_escaped_string}"));
+            $('#register_error').css("display", "block");
+          }
+        });
+        %endif
       });
-    % endif
+    }).call(this, require || RequireJS.require);
 
-    ## making the conditional around this entire JS block for sanity
-    %if settings.FEATURES.get('RESTRICT_ENROLL_BY_REG_METHOD') and course.enrollment_domain:
-      <%
-        perms_error = Text(_('The currently logged-in user account does not have permission to enroll in this course. '
-                        'You may need to {start_logout_tag}log out{end_tag} then try the enroll button again. '
-                        'Please visit the {start_help_tag}help page{end_tag} for a possible solution.')).format(
-                          start_help_tag=HTML("<a href='/faq'>"), end_tag=HTML('</a>'),
-                          start_logout_tag=HTML("<a href='/logout'>")
-                          )
-      %>
-    $('#class_enroll_form').on('ajax:complete', function(event, xhr) {
-      if(xhr.status == 200) {
-        location.href = "${reverse('dashboard')| n, js_escaped_string}";
-      } else if (xhr.status == 403) {
-        location.href = "${reverse('course-specific-register', args=[course.id.to_deprecated_string()])| n, js_escaped_string}?course_id=${course.id | u}&enrollment_action=enroll";
-      } else if (xhr.status == 400) { //This means the user did not have permission
-        $('#register_error').html("${perms_error| n, js_escaped_string}").css("display", "block");
-      } else {
-        $('#register_error').html(
-            (xhr.responseText ? xhr.responseText : "${_("An error occurred. Please try again later.")| n, js_escaped_string}")
-        ).css("display", "block");
-      }
-    });
-
-    %else:
-
-    $('#class_enroll_form').on('ajax:complete', function(event, xhr) {
-      if(xhr.status == 200) {
-        if (xhr.responseText == "") {
-          location.href = "${reverse('dashboard')| n, js_escaped_string}";
-        }
-        else {
-          location.href = xhr.responseText;
-        }
-      } else if (xhr.status == 403) {
-          // If the form submission receives a Forbidden response, the user is not currently authenticated
-          // Include the purchase workflow context along with the regular user registration location information
-          var purchase_workflow = "&purchase_workflow=" + $("input#purchase_workflow").val();
-          location.href = "${reverse('register_user')| n, js_escaped_string}?course_id=${course.id | u}&enrollment_action=enroll" + purchase_workflow;
-      } else {
-        $('#register_error').html(
-            (xhr.responseText ? xhr.responseText : "${_("An error occurred. Please try again later.")| n, js_escaped_string}")
-        ).css("display", "block");
-      }
-    });
-
-    %endif
-    });
   </script>
 
   <%include file="../about_site.html" />
