@@ -38,8 +38,7 @@
 
             render: function( html ) {
                 var fields = html || '';
-                var message = 'We have sent an email message with password reset instructions to the email ' +
-                'address you provided.  If you do not receive this message, {anchorStart}contact edX support{anchorEnd}.';
+                var message = gettext('We have sent an email message with password reset instructions to the email address you provided.  If you do not receive this message, {anchorStart}contact technical support{anchorEnd}.'); // jshint ignore:line
                 this.message = HtmlUtils.interpolateHtml(message, {
                     anchorStart: HtmlUtils.HTML('<a href="'+ this.supportURL + '">'),
                     anchorEnd: HtmlUtils.HTML('</a>')
@@ -96,7 +95,7 @@
                 this.element.hide( this.$errors );
                 this.resetMessage = this.$resetSuccess.find('.message-copy');
                 if (this.resetMessage.find('p').length == 0){
-                    this.resetMessage.append("<p>" + gettext(this.message) + "</p>");
+                    this.resetMessage.append("<p>" + this.message + "</p>");
                 }
                 this.element.show( this.$resetSuccess );
             },
