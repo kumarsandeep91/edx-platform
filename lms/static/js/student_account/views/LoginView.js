@@ -95,7 +95,9 @@
             resetEmail: function() {
                 this.element.hide( this.$errors );
                 this.resetMessage = this.$resetSuccess.find('.message-copy');
-                this.resetMessage.append("<p>" + this.message + "</p>");
+                if (this.resetMessage.find('p').length == 0){
+                    this.resetMessage.append("<p>" + gettext(this.message) + "</p>");
+                }
                 this.element.show( this.$resetSuccess );
             },
 
