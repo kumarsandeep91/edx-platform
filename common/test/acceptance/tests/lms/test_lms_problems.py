@@ -507,3 +507,49 @@ class CAPAProblemQuestionDescriptionA11yTest(ProblemsTest):
 
         # Run the accessibility audit.
         problem_page.a11y_audit.check_for_accessibility_errors()
+
+
+@attr('a11y')
+class ProblemTextInputA11yTest(ProblemsTest):
+    """
+    Tests TextInput accessibility.
+    """
+
+    def get_problem(self):
+        """
+        TextInput problem XML.
+        """
+        xml = dedent("""
+        <problem>
+            <stringresponse answer="fight" type="ci">
+                <label>who wishes to _____ must first count the cost.</label>
+                <description>Appear weak when you are strong, and strong when you are weak.</description>
+                <description>In the midst of chaos, there is also opportunity.</description>
+                <textline size="40"/>
+            </stringresponse>
+            <stringresponse answer="force" type="ci">
+                <label>A leader leads by example not by _____.</label>
+                <description>The supreme art of war is to subdue the enemy without fighting.</description>
+                <description>Great results, can be achieved with small forces.</description>
+                <textline size="40"/>
+            </stringresponse>
+        </problem>""")
+        return XBlockFixtureDesc('problem', 'TEXTINPUT PROBLEM', data=xml)
+
+    def test_a11y(self):
+        """
+        Scenario: Verifies that accessibility works for TextInput problem.
+        Given I am enrolled in a course.
+        And I visit a unit page with two CAPA problems
+        Then I check question and description has unique IDs
+        """
+        self.courseware_page.visit()
+        problem_page = ProblemPage(self.browser)
+
+        # Set the scope to the problem question
+        problem_page.a11y_audit.config.set_scope(
+            include=['section.wrapper-problem-response']
+        )
+
+        # Run the accessibility audit.
+        problem_page.a11y_audit.check_for_accessibility_errors()

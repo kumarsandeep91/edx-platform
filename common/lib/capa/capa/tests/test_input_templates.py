@@ -427,8 +427,7 @@ class TextlineTemplateTest(TemplateTestCase):
 
     def test_label(self):
         xml = self.render_to_xml(self.context)
-        xpath = "//input[@aria-label='%s']" % self.context['response_data']['label']
-        self.assert_has_xpath(xml, xpath, self.context)
+        self.assert_has_xpath(xml, "//label[@class='question-label']", self.RESPONSE_DATA['label'])
 
     def test_hidden(self):
         self.context['hidden'] = True
@@ -508,6 +507,10 @@ class TextlineTemplateTest(TemplateTestCase):
         Test that correct description information is set on desired elements.
         """
         xml = self.render_to_xml(self.context)
+
+        # Verify that each description <p> tag has correct id, text and order
+        descriptions = OrderedDict((tag.get('id'), tag.text) for tag in xml.xpath('//p[@class="question-description"]'))
+        self.assertEqual(self.DESCRIPTIONS, descriptions)
 
         # Verify that input aria-describedby attribute has correct description ids
         fieldset_aria_describedby = xml.xpath("string(//input/@aria-describedby)")
