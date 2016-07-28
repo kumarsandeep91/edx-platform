@@ -310,7 +310,7 @@ from openedx.core.djangolib.js_utils import js_escaped_string
               <h2>${_("Want to purchase this course for a group?")} </h2>
               <p>${_("You can purchase enrollment codes for this course to distribute to your team")}</p>
 
-              % if not ecommerce_bulk_checkout_link:
+              % if ecommerce_bulk_checkout_link:
                 <%
                     url = "mailto:harvardxplus@harvard.edu?Subject={course_id}%20{run}%20Bulk%20Discount".format(course_id=course_details.course_id, run=course_details.run)
                     link_start = HTML("<a href='{url}'>").format(url=Text(url))

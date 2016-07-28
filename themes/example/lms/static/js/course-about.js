@@ -1,7 +1,11 @@
 
 (function(require) {
-    require(['edx-ui-toolkit/js/utils/html-utils', '/static/example/js/leanModal.js'], function(HtmlUtils, lean) {
-        "use strict"
+    "use strict";
+
+    require([
+        'edx-ui-toolkit/js/utils/html-utils',
+         '/static/example/js/leanModal.js'
+        ], function(HtmlUtils, lean) { // jshint ignore:line
       init();
 
       function init(){
@@ -40,8 +44,11 @@
 
       function expandLearningPoints(entireLearningContent){
           var showLessLinkHtml = '<a id="learning_less" href="#" class="brand-link learning-points-btn">Less</a>';
-          HtmlUtils.setHtml(".course-learning .list-bulleted", HtmlUtils.HTML(entireLearningContent + showLessLinkHtml));
-          $("#learning_less").click(function(event){
+          HtmlUtils.setHtml(
+            ".course-learning .list-bulleted",
+            HtmlUtils.HTML(entireLearningContent + showLessLinkHtml)
+          );
+          $("#learning_less").click(function(){
               truncateLearningPoints(entireLearningContent);
           });
       }
@@ -50,7 +57,7 @@
           var learning_points_count = $(".course-learning .list-bulleted").children().length;
           if (learning_points_count > 6) {
               $(".course-learning .list-bulleted").children().slice((6 - learning_points_count)).remove();
-              var showMoreLinkHtml = '<a id="learning_show" href="#" class="brand-link learning-points-btn">See More</a>';
+              var showMoreLinkHtml='<a id="learning_show" href="#" class="brand-link learning-points-btn">See More</a>';
               HtmlUtils.append(".course-learning .list-bulleted", HtmlUtils.HTML(showMoreLinkHtml));
               $("#learning_show").click(function (event) {
                   event.preventDefault();

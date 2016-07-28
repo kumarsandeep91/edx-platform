@@ -1,6 +1,7 @@
 (function(require) {
+    "use strict";
+
     require(['edx-ui-toolkit/js/utils/html-utils'], function(HtmlUtils) {
-        "use strict"
         $(function() {
             HtmlUtils.setHtml(".about-container", HtmlUtils.HTML($("#about-content").html()));
             //$(".about-container").html($("#about-content").html());

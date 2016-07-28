@@ -1,6 +1,7 @@
 (function(require) {
+  "use strict";
+
   require(['edx-ui-toolkit/js/utils/html-utils'], function(HtmlUtils) {
-    "use strict";
     $.fn.extend({
       /*
        * leanModal prepares an element to be a modal dialog.  Call it once on the
@@ -86,7 +87,7 @@
             if (notice !== undefined) {
               var $notice = $(modal_id).find(".notice");
               $notice.show();
-              $notice.append(HtmlUtils.ensureHtml(html).toString());
+              $notice.append(HtmlUtils.ensureHtml(notice).toString());
 
               // This is for activating leanModal links that were in the notice. We should have a cleaner way of
               // allowing all dynamically added leanmodal links to work.

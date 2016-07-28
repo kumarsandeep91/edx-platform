@@ -1,6 +1,7 @@
 (function(require) {
+    "use strict";
+
     require(['edx-ui-toolkit/js/utils/html-utils'], function(HtmlUtils) {
-        "use strict"
         $(function() {
             $("#submit_btn").click(function(e) {
                 e.preventDefault();
@@ -16,17 +17,17 @@
             "email": "Please provide a valid e-mail.",
             "details": "Please provide message.",
             "subject": "Please provide an inquiry type."
-        }
+        };
 
         function submitForm(data) {
-            $.post("/submit_feedback", data, function(data, status) {
+            $.post("/submit_feedback", data, function() {
                 $("#success-message-btn").click();
                 setTimeout(function() {
                     $("#lean_overlay").trigger("click");
                     $('#contact_form').trigger("reset");
                 }, 2000);
-            }).fail(function(xhr, status, error) {
-                responseData = jQuery.parseJSON(xhr.responseText);
+            }).fail(function(xhr) {
+                var responseData = jQuery.parseJSON(xhr.responseText);
                 addErrorDiv(responseData.field);
             });
         }
@@ -50,7 +51,7 @@
             var optional_fields = ["user_type"]; //Optional fields array
             var form_values = $("#contact_form").find(":input"),
                 i = 0,
-                data = new Object(),
+                data = {},
                 response = {
                     "is_form_validate": true,
                     data: ""
@@ -64,7 +65,7 @@
                 if (value && value !== "") {
                     data[id] = value;
                 } else {
-                    if ($.inArray(id, optional_fields) == -1) {
+                    if ($.inArray(id, optional_fields) === -1) {
                         response.is_form_validate = false;
                         addErrorDiv(id);
                     }
