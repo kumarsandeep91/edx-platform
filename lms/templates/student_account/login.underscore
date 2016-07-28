@@ -10,10 +10,6 @@
     <div class="js-reset-success status submission-success hidden">
         <h4 class="message-title"><%- gettext("Password Reset Email Sent") %></h4>
         <div class="message-copy">
-            <p>
-                <%- gettext("We have sent an email message with password reset instructions to the email address you provided.  If you do not receive this message, ") %>
-                <a href="<%- context.supportURL %>"> <%- gettext("contact edX support") %> </a>
-            </p>
         </div>
     </div>
 

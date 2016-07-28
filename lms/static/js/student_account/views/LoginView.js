@@ -4,9 +4,10 @@
             'jquery',
             'underscore',
             'gettext',
+            'edx-ui-toolkit/js/utils/html-utils',
             'js/student_account/views/FormView'
         ],
-        function($, _, gettext, FormView) {
+        function($, _, gettext, HtmlUtils, FormView) {
 
         return FormView.extend({
             el: '#login-form',
@@ -37,6 +38,12 @@
 
             render: function( html ) {
                 var fields = html || '';
+                var message = 'We have sent an email message with password reset instructions to the email ' +
+                'address you provided.  If you do not receive this message, {anchorStart}contact edX support{anchorEnd}.';
+                this.message = HtmlUtils.interpolateHtml(message, {
+                    anchorStart: HtmlUtils.HTML('<a href="'+ this.supportURL + '">'),
+                    anchorEnd: HtmlUtils.HTML('</a>')
+                });
 
                 $(this.el).html(_.template(this.tpl)({
                     // We pass the context object to the template so that
@@ -47,8 +54,7 @@
                         errorMessage: this.errorMessage,
                         providers: this.providers,
                         hasSecondaryProviders: this.hasSecondaryProviders,
-                        platformName: this.platformName,
-                        supportURL: this.supportURL
+                        platformName: this.platformName
                     }
                 }));
 
@@ -88,6 +94,8 @@
 
             resetEmail: function() {
                 this.element.hide( this.$errors );
+                this.resetMessage = this.$resetSuccess.find('.message-copy');
+                this.resetMessage.append("<p>" + this.message + "</p>");
                 this.element.show( this.$resetSuccess );
             },
 
