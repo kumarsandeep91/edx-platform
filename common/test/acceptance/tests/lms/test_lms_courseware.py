@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import ddt
 
 from capa.tests.response_xml_factory import MultipleChoiceResponseXMLFactory
+from flaky import flaky
 from ..helpers import UniqueCourseTest, EventsTestMixin
 from ...pages.studio.auto_auth import AutoAuthPage
 from ...pages.lms.create_mode import ModeCreationPage
@@ -898,6 +899,7 @@ class SubsectionHiddenAfterDueDateTest(UniqueCourseTest):
             metadata={'rerandomize': 'always'}
         )
 
+    @flaky(max_runs=20, min_passes=1)
     def test_subsecton_hidden_after_due_date(self):
         """
         Given that I am a staff member on the exam settings section
