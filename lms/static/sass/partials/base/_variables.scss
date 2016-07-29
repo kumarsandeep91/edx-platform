@@ -159,11 +159,14 @@ $blue-t1: rgba($blue, 0.25);
 $blue-t2: rgba($blue, 0.50);
 $blue-t3: rgba($blue, 0.75);
 
-$uxpl-blue-base: rgba(0, 116, 180, 1); // wcag2a compliant
-$uxpl-blue-hover-active: lighten($uxpl-blue-base, 7%); // wcag2a compliant
+$uxpl-blue-base: rgb(0, 117, 180); // wcag2a compliant
+$uxpl-blue-hover-active: rgb(41, 145, 195); // wcag2a compliant
 
-$uxpl-green-base: rgba(0, 129, 0, 1); // wcag2a compliant
-$uxpl-green-hover-active: lighten($uxpl-green-base, 7%); // wcag2a compliant
+$uxpl-green-base: rgb(0, 129, 0); // wcag2a compliant
+$uxpl-green-hover-active: rgb(0, 155, 0); // wcag2a compliant
+
+$uxpl-pink-base: rgb(194, 56, 125); // wcag2a compliant
+$uxpl-pink-hover-active: lighten($uxpl-pink-base, 7%); // wcag2a compliant
 
 $orange: rgb(237, 189, 60);
 $orange-l1: tint($orange,20%);
@@ -311,7 +314,7 @@ $audit-color-lvl2: tint($audit-color-lvl1, 33%);
 $credit-color-base: rgb(244,195,0); // accessible with black text
 
 // edx-specific: Studio/Staff actions
-$staff-color: $pink;
+$staff-color: $uxpl-pink-base;
 
 
 // ----------------------------
