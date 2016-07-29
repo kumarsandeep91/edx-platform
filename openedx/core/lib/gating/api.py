@@ -286,15 +286,12 @@ def get_gated_content(course, user):
     Returns:
         list: The list of gated content usage keys for the given course
     """
-    if _has_access_to_course(user, 'staff', course.id):
-        return []
-    else:
-        # Get the unfulfilled gating milestones for this course, for this user
-        return [
-            m['content_id'] for m in find_gating_milestones(
-                course.id,
-                None,
-                'requires',
-                {'id': user.id}
-            )
-        ]
+    # Get the unfulfilled gating milestones for this course, for this user
+    return [
+        m['content_id'] for m in find_gating_milestones(
+            course.id,
+            None,
+            'requires',
+            {'id': user.id}
+        )
+    ]
