@@ -1742,7 +1742,7 @@ class CustomResponseTest(ResponseTest):  # pylint: disable=missing-docstring
 
         self.assertEqual(correctness, 'partially-correct')
         self.assertEqual(msg, "Message text")
-        self.assertTrue(0 <= npoints <= 1)
+        self.assertTrue(0 <= npoints <= 1)      # NEDTODO: edx-lint needs to be smarter.
 
         # Incorrect answer
         input_dict = {'1_2_1': '0'}
