@@ -142,7 +142,7 @@ class ApiTest(TestCase):
 
     def create_notes(self, num_notes, create=True):
         notes = []
-        for n in range(num_notes):
+        for __ in range(num_notes):
             note = models.Note(**self.note)
             if create:
                 note.save()
@@ -431,13 +431,13 @@ class NoteTest(TestCase):
         note = models.Note(course_id=self.course_key, user=self.student)
         for empty_type in (None, '', 0, []):
             with self.assertRaises(ValidationError):
-                note.clean(None)
+                note.clean(empty_type)
 
         with self.assertRaises(ValidationError):
             note.clean(json.dumps({
                 'text': 'foo',
                 'quote': 'bar',
-                'ranges': [{} for i in range(10)]  # too many ranges
+                'ranges': [{} for __ in range(10)]  # too many ranges
             }))
 
     def test_as_dict(self):
