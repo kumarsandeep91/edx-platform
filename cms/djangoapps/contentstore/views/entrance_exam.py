@@ -131,7 +131,7 @@ def _create_entrance_exam(request, course_key, entrance_exam_minimum_score_pct=N
         return HttpResponse(status=400)
 
     # Create the entrance exam item (currently it's just a chapter)
-    payload = {
+    payload = {     # NEDTODO: payload is unused!?
         'category': "chapter",
         'display_name': _("Entrance Exam"),
         'parent_locator': unicode(course.location),

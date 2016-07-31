@@ -148,7 +148,7 @@ def container_handler(request, usage_key_string):
 
             # need to figure out where this item is in the list of children as the
             # preview will need this
-            index = 1
+            index = 1   # NEDTODO: unused variable, so entire loop is unneeded?
             for child in subsection.get_children():
                 if child.location == unit.location:
                     break

@@ -138,7 +138,7 @@ class CourseMode(models.Model):
     DEFAULT_SHOPPINGCART_MODE_SLUG = HONOR
     DEFAULT_SHOPPINGCART_MODE = Mode(HONOR, _('Honor'), 0, '', 'usd', None, None, None, None)
 
-    class Meta(object):
+    class Meta(object):     # NEDTODO: this is a duplicate, but combining it causes migration failures?
         unique_together = ('course_id', 'mode_slug', 'currency')
 
     def clean(self):
