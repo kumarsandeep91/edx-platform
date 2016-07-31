@@ -200,6 +200,7 @@ class TeamAPITestCase(APITestCase, SharedModuleStoreTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(TeamAPITestCase, cls).setUpClass()
         with super(TeamAPITestCase, cls).setUpClassAndTestData():
             teams_configuration_1 = {
                 'topics':
